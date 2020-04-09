@@ -28,8 +28,11 @@ public class NIOSocketHandler implements SocketHandler {
     private ByteBuffer peerNetData;
     private SSLEngine engine;
     private SSLHandler sslHandler;
+    private ISOClientEventListener isoClientEventListener;
 
     public void init(String host, int port, ISOClientEventListener isoClientEventListener, SSLHandler sslHandler) throws ISOClientException {
+
+        this.isoClientEventListener = isoClientEventListener;
 
         try {
             this.sslHandler = sslHandler;
@@ -68,6 +71,8 @@ public class NIOSocketHandler implements SocketHandler {
 
     public void init(String host, int port, ISOClientEventListener isoClientEventListener) throws IOException {
 
+        this.isoClientEventListener = isoClientEventListener;
+
         socketChannel = SocketChannel.open();
         socketChannel.configureBlocking(false);
         socketChannel.connect(new InetSocketAddress(host, port));
@@ -87,9 +92,11 @@ public class NIOSocketHandler implements SocketHandler {
 
     public byte[] sendMessageSync(ByteBuffer buffer, int length) throws IOException {
 
+        final ByteBuffer messageBuffer = isoClientEventListener.beforeSendingMessage(buffer);
+
         if(sslHandler != null)
         {
-            byte[] data = sendMessageSyncOverSsl(buffer);
+            byte[] data = sendMessageSyncOverSsl(messageBuffer);
             return Arrays.copyOfRange(data,(length>0)?(length):(0),data.length);
         }
         else{
@@ -107,7 +114,8 @@ public class NIOSocketHandler implements SocketHandler {
             myAppData.compact();
             myAppData.flip();
 
-
+            isoClientEventListener.afterSendingMessage();
+            isoClientEventListener.beforeReceiveResponse();
 
             int r;
             do{
@@ -115,11 +123,14 @@ public class NIOSocketHandler implements SocketHandler {
             }
             while (myAppData.remaining() >=0 && r == 0);
 
+            byte[] resp = new byte[0];
 
             if(myAppData.position() > length)
-                return Arrays.copyOfRange(myAppData.array(),(length>0)?(length):(0),myAppData.position());
+                resp = Arrays.copyOfRange(myAppData.array(), (length > 0) ? (length) : (0), myAppData.position());
 
-            return new byte[0];
+            final byte[] finalResp = isoClientEventListener.afterReceiveResponse(resp);
+
+            return finalResp;
         }
     }
 

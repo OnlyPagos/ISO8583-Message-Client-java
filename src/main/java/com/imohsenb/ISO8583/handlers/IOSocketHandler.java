@@ -65,10 +65,10 @@ public class IOSocketHandler implements SocketHandler {
 
     public byte[] sendMessageSync(ByteBuffer buffer, int length) throws IOException, ISOClientException {
 
-        isoClientEventListener.beforeSendingMessage();
+        final ByteBuffer messageBuffer = isoClientEventListener.beforeSendingMessage(buffer);
 
         for (byte v :
-                buffer.array()) {
+                messageBuffer.array()) {
             socketWriter.write(v);
         }
 
@@ -110,9 +110,9 @@ public class IOSocketHandler implements SocketHandler {
 
             byte[] resp = Arrays.copyOfRange(readBuffer.array(),0,readBuffer.position());
 
-            isoClientEventListener.afterReceiveResponse();
+            final byte[] finalResp = isoClientEventListener.afterReceiveResponse(resp);
 
-            return resp;
+            return finalResp;
 
         } catch (SocketTimeoutException e) {
             throw new ISOClientException("Read Timeout");

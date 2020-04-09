@@ -1,5 +1,7 @@
 package com.imohsenb.ISO8583.interfaces;
 
+import java.nio.ByteBuffer;
+
 /**
  * @author Mohsen Beiranvand
  */
@@ -33,5 +35,15 @@ public interface ISOClientEventListener {
     }
 
     default void afterReceiveResponse() {
+    }
+
+    default ByteBuffer beforeSendingMessage(final ByteBuffer buffer) {
+        beforeSendingMessage();
+        return buffer;
+    }
+
+    default byte[] afterReceiveResponse(final byte[] resp) {
+        afterReceiveResponse();
+        return resp;
     }
 }

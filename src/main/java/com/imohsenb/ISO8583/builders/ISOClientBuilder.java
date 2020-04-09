@@ -232,57 +232,8 @@ public class ISOClientBuilder {
 
     }
 
+    //default is listener
     private static class EmptyISOClientEventListener implements ISOClientEventListener {
-        @Override
-        public void connecting() {
-
-        }
-
-        @Override
-        public void connected() {
-
-        }
-
-        @Override
-        public void connectionFailed() {
-
-        }
-
-        @Override
-        public void connectionClosed() {
-
-        }
-
-        @Override
-        public void disconnected() {
-
-        }
-
-        @Override
-        public void beforeSendingMessage() {
-
-        }
-
-        @Override
-        public void afterSendingMessage() {
-
-        }
-
-        @Override
-        public void onReceiveData() {
-
-        }
-
-        @Override
-        public void beforeReceiveResponse() {
-
-        }
-
-        @Override
-        public void afterReceiveResponse() {
-
-        }
     }
-
 
 }
